@@ -1,6 +1,6 @@
-from data_loader import load_file, prepare_wca_dataframe, prepare_form_dataframe
+from src.data_loader import load_file, prepare_wca_dataframe, prepare_form_dataframe
 
-from matcher import match_by_wca_id
+from src.matcher import match_by_wca_id
 
 
 def main():
