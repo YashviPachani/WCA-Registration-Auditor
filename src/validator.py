@@ -43,7 +43,11 @@ def find_event_mismatches(matched_df):
 
 def find_duplicates(form_df):
     """Same email or WCA ID submitted more than once."""
+    
+    # Drop resubmissions first (keep latest, assuming form_df already sorted by timestamp)
+    deduped = form_df.drop_duplicates(subset=["wca_id"], keep="first")
+    
     return {
-        "email": form_df[form_df.duplicated("email", keep=False)],
-        "wca_id": form_df[form_df.duplicated("wca_id", keep=False)],
+        "email":  deduped[deduped.duplicated("email",  keep=False)],
+        "wca_id": deduped[deduped.duplicated("wca_id", keep=False)],
     }

@@ -10,7 +10,7 @@ from src.validator import (
     find_missing_in_wca,
     find_missing_in_form,
     find_event_mismatches,
-    find_duplicates,
+    #find_duplicates,
 )
 from src.fee_calculator import verify_payment
 
@@ -42,18 +42,18 @@ if wca_file and form_file:
     missing_wca = find_missing_in_wca(matched_df)
     missing_form = find_missing_in_form(matched_df)
     event_mismatches = find_event_mismatches(matched_df)
-    duplicates = find_duplicates(form_df)
+    #duplicates = find_duplicates(form_df)
     st.header("Summary")
 
-    c1, c2, c3, c4, c5 = st.columns(5)
+    c1, c2, c3, c4 = st.columns(4)
 
     c1.metric("Competitors", len(matched_df))
     c2.metric("Missing in WCA", len(missing_wca))
     c3.metric("Missing in Form", len(missing_form))
     c4.metric("Event Mismatches", len(event_mismatches))
 
-    duplicate_count = len(duplicates["email"]) + len(duplicates["wca_id"])
-    c5.metric("Duplicates", duplicate_count)
+    # duplicate_count = len(duplicates["email"]) + len(duplicates["wca_id"])
+    # c5.metric("Duplicates", duplicate_count)
 
     tab1, tab2, tab3 = st.tabs([
         "Matched Data",

@@ -3,7 +3,7 @@ import os
 sys.path.insert(0, os.path.dirname(__file__))
 
 from data_loader    import load_file, prepare_wca_dataframe, prepare_form_dataframe
-from matcher        import match_by_wca_id
+from matcher import match_competitors 
 from validator      import find_missing_in_wca, find_missing_in_form, find_event_mismatches, find_duplicates
 from fee_calculator import verify_payment
 from reports        import generate_report
@@ -23,7 +23,7 @@ def run_audit(wca_path, form_path, report_path='data/processed/report.xlsx'):
 
     # ── 3. Match competitors ───────────────────────────────────
     print("Matching competitors...")
-    matched_df = match_by_wca_id(wca_df, form_df)
+    matched_df = match_competitors(wca_df, form_df)
 
     # ── 4. Run all checks ──────────────────────────────────────
     print("Running audit checks...")

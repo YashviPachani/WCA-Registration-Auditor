@@ -47,33 +47,32 @@ def clean_events(event_string):
 
 
 def prepare_wca_dataframe(df):
-
     event_columns = ["333", "222", "444", "333oh", "clock", "pyram"]
 
     def extract_events(row):
         events = []
-
         for event in event_columns:
             value = row[event]
-
-            if pd.notna(value) and str(value).strip() != "":
+            if pd.notna(value) and str(value).strip() == "1":
                 events.append(event)
-
         return events
 
     return pd.DataFrame({
         "wca_id": df["WCA ID"],
-        "name": df["Name"].str.strip().str.lower(),
+        "name":   df["Name"].str.strip().str.lower(),
+        "email_wca": df["Email"].str.strip().str.lower(),  # ← add this
         "events_wca": df.apply(extract_events, axis=1),
     })
 
 
 def prepare_form_dataframe(df):
+ if "Timestamp" in df.columns:
+        df = df.sort_values("Timestamp", ascending=False)
 
-    return pd.DataFrame({
-        "wca_id": df["WCA ID (if available)"],
-        "name": df["Participant Name"].str.strip().str.lower(),
-        "email": df["E-mail ID:"].str.strip().str.lower(),
+ return pd.DataFrame({
+        "wca_id":      df["WCA ID (if available)"],
+        "name":        df["Participant Name"].str.strip().str.lower(),
+        "email":       df["E-mail ID:"].str.strip().str.lower(),
         "events_form": df["Events you wish to participate in:"].apply(clean_events),
         "amount_paid": pd.to_numeric(df["Total"], errors="coerce"),
     })
