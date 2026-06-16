@@ -10,7 +10,7 @@ from src.validator import (
     find_missing_in_wca,
     find_missing_in_form,
     find_event_mismatches,
-    #find_duplicates,
+    # find_duplicates,
 )
 from src.fee_calculator import verify_payment
 
@@ -37,12 +37,20 @@ if wca_file and form_file:
     wca_df = prepare_wca_dataframe(wca_raw)
     form_df = prepare_form_dataframe(form_raw)
 
+    print("FORM EVENTS:")
+    print(form_df["events_form"].head(10).tolist())
+    print(form_raw["Events you wish to participate in:"].head(10).tolist())
+
+    print("\nWCA EVENTS:")
+    print(wca_df["events_wca"].head(10).tolist())
+
     matched_df = match_competitors(wca_df, form_df)
 
     missing_wca = find_missing_in_wca(matched_df)
     missing_form = find_missing_in_form(matched_df)
     event_mismatches = find_event_mismatches(matched_df)
-    #duplicates = find_duplicates(form_df)
+    print(event_mismatches[event_mismatches["wca_id"].isna()].head(20))
+    # duplicates = find_duplicates(form_df)
     st.header("Summary")
 
     c1, c2, c3, c4 = st.columns(4)
