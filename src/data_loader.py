@@ -27,19 +27,22 @@ def clean_events(event_string):
         return []
 
     event_map = {
-        "3x3x3 cube": "333",
-        "2x2x2 cube": "222",
-        "4x4x4 cube": "444",
-        "5x5x5 cube": "555",
-        "3x3x3 one-handed": "333oh",
-        "3x3x3 blindfolded": "333bf",
-        "3x3x3 fewest moves": "333fm",
-        "clock": "clock",
-        "pyraminx": "pyram",
-        "megaminx": "minx",
-        "skewb": "skewb",
-        "square1": "sq1",
-    }
+    "3x3x3 cube": "333",
+    "2x2x2 cube": "222",
+    "4x4x4 cube": "444",
+    "5x5x5 cube": "555",
+    "3x3x3 one-handed": "333oh",   # with hyphen
+    "3x3x3 one handed": "333oh",   # without hyphen
+    "3x3x3 blindfolded": "333bf",
+    "3x3x3 fewest moves": "333fm",
+    "clock": "clock",
+    "pyraminx": "pyram",
+    "megaminx": "minx",
+    "megamnix cube": "minx",       
+    "skewb": "skewb",
+    "square1": "sq1",
+    "sq-1": "sq1",
+}
 
     events = []
 
@@ -51,6 +54,35 @@ def clean_events(event_string):
 
     return events
 
+
+def merge_duplicate_submissions(df):
+    df = df.copy()
+    amount_col = get_amount_column(df)
+    
+    df["_group_key"] = df.apply(
+        lambda row: str(row["WCA ID (if available)"]).strip().upper() 
+        if pd.notna(row["WCA ID (if available)"]) and str(row["WCA ID (if available)"]).strip().upper() not in ["", "NAN"]
+        else row["Participant Name"].strip().lower(),
+        axis=1
+    )
+    
+    merged_rows = []
+    for key, group in df.groupby("_group_key", sort=False):
+        base = group.iloc[0].to_dict()
+        
+        # Always compute events_form for ALL entries (single or duplicate)
+        all_events = []
+        for _, row in group.iterrows():
+            events = clean_events(str(row.get("Events you wish to participate in:", "")))
+            all_events.extend(events)
+        base["events_form"] = list(dict.fromkeys(all_events))
+        
+        # Always sum payments
+        base["amount_paid"] = pd.to_numeric(group[amount_col], errors="coerce").sum()
+        
+        merged_rows.append(base)
+    
+    return pd.DataFrame(merged_rows)
 
 def prepare_wca_dataframe(df):
 
@@ -103,17 +135,30 @@ def prepare_wca_dataframe(df):
         "events_wca": df.apply(extract_events, axis=1),
     })
 
+def get_amount_column(df):
+    possible = ["Total", "fees", "Amount Paid", "Amount", "Payment Amount", "Fee", "total collection"]
+    for col in possible:
+        if col in df.columns:
+            return col
+    raise KeyError(f"No payment column found. Available columns: {df.columns.tolist()}")
+
+
+
+
 
 def prepare_form_dataframe(df):
     if "Timestamp" in df.columns:
         df = df.sort_values("Timestamp", ascending=False)
+    
+    # Merge duplicate submissions — combine events and sum payments
+    df = merge_duplicate_submissions(df)
 
     return pd.DataFrame({
-        "wca_id": df["WCA ID (if available)"],
-        "name": df["Participant Name"].str.strip().str.lower(),
-        "email": df["E-mail ID:"].str.strip().str.lower(),
-        "events_form": df["Events you wish to participate in:"].apply(clean_events),
-        "amount_paid": pd.to_numeric(df["Total"], errors="coerce"),
+        "wca_id":      df["WCA ID (if available)"],
+        "name":        df["Participant Name"].str.strip().str.lower(),
+        "email":       df["E-mail ID:"].str.strip().str.lower(),
+        "events_form": df["events_form"],
+        "amount_paid": df["amount_paid"],
     })
 
 
