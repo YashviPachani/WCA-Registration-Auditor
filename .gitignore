@@ -5,3 +5,5 @@ __pycache__/
 .vscode/
 report.xlsx
 *.xlsx
+credentials.json
+data/screenshots/
