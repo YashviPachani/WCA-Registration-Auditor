@@ -1,0 +1,7 @@
+wca_id,name,email,events_wca,events_form,amount_paid,missing_in_wca,missing_in_form
+2020DESA01,aryan desai,,['3x3'],,,False,True
+2021MEHT01,neha mehta,neha@example.com,"['3x3', '4x4', '5x5']","['3x3', '4x4', '5x5']",500.0,False,False
+2022SHAH01,rahul shah,rahul@example.com,"['3x3', 'clock', 'skewb']","['3x3', 'skewb']",350.0,False,False
+2023PATI01,yashvi patil,yashvi@example.com,"['3x3', '2x2']","['3x3', '2x2']",400.0,False,False
+2024MORI01,vatsal mori,vatsal@example.com,"['3x3', '2x2', 'pyraminx']","['3x3', '2x2', 'pyraminx']",450.0,False,False
+2025NEWC01,new competitor,new@example.com,,"['3x3', '2x2']",400.0,True,False
