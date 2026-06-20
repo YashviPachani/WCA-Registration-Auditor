@@ -105,24 +105,3 @@ def download_all_screenshots(df):
     print(f"Failed     : {failed}")
 
     os.makedirs("data/screenshots", exist_ok=True)
-
-    for _, row in df.iterrows():
-        link = row["screenshot_link"]
-
-        if not link:
-            continue
-
-        file_id = extract_file_id(link)
-
-        if not file_id:
-            continue
-
-        participant = safe_filename(row["name"])
-
-        output_path = f"data/screenshots/{participant}.jpg"
-
-        try:
-            download_file(file_id, output_path)
-
-        except Exception as e:
-            print(f"Failed for {participant}: {e}")

@@ -179,6 +179,10 @@ def prepare_form_dataframe(df):
         "events_form": df["events_form"],
         "amount_paid": df["amount_paid"],
         "screenshot_link": df["screenshot_link"],
+        "participant_filename": df["Participant Name"]
+        .str.strip()
+        .str.lower()
+        .str.replace(" ", "_", regex=False),
     })
 
 

@@ -70,22 +70,31 @@ if wca_file and form_file:
     for _, row in ocr_df.iterrows():
         ocr_lookup[row["file"]] = row["amount"]
 
+    ocr_files = list(ocr_lookup.keys())
+    print("\nFIRST 10 OCR FILES:")
+    print(list(ocr_lookup.keys())[:10])
+
     for _, row in matched_df.iterrows():
         if row["missing_in_wca"] or row["missing_in_form"]:
             continue
 
         expected = calculate_expected_fee(len(row["events_form"]))
 
-        participant = row["name"].replace(" ", "_")
+        participant = row["participant_filename"]
 
-        wca_id = row.get("wca_id")
+        filename = None
 
-        if pd.notna(wca_id) and str(wca_id).strip():
-            filename = f"{wca_id}_{participant}.jpg"
-        else:
-            filename = f"{participant}.jpg"
+        for f in ocr_files:
+            if participant in f:
+                filename = f
+                break
+        if filename is None:
+            print("NO OCR FILE:", participant)
 
         detected = ocr_lookup.get(filename)
+
+        if detected is None:
+            print("NOT FOUND:", filename)
 
         if pd.isna(detected):
             status = "OCR FAILED"
@@ -108,6 +117,18 @@ if wca_file and form_file:
         })
 
     payment_results = pd.DataFrame(payment_rows)
+    failed_ocr_files = set(ocr_df[ocr_df["amount"].isna()]["file"])
+
+    payment_failed_files = set(
+        payment_results[payment_results["status"] == "OCR FAILED"]["file"]
+    )
+
+    print("\nOCR FAILURES NOT IN DASHBOARD:")
+    print(failed_ocr_files - payment_failed_files)
+
+    print("\nCount:", len(failed_ocr_files - payment_failed_files))
+    print("\nPAYMENT RESULT FILES:")
+    print(payment_results[["name", "file"]].head(10))
     missing_wca = find_missing_in_wca(matched_df)
     missing_form = find_missing_in_form(matched_df)
     event_mismatches = find_event_mismatches(matched_df)
