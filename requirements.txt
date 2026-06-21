@@ -3,3 +3,9 @@ openpyxl
 streamlit
 python-dotenv
 rapidfuzz
+easyocr
+torch
+torchvision
+opencv-python
+google-api-python-client
+google-auth

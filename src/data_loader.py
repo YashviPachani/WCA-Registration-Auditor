@@ -55,9 +55,21 @@ def clean_events(event_string):
     return events
 
 
+def get_screenshot_column(df):
+    """Find the screenshot upload column even if its exact name changes each competition."""
+    for col in df.columns:
+        if "screenshot" in col.lower() and "payment" in col.lower():
+            return col
+    raise KeyError(f"No screenshot column found. Available columns: {df.columns.tolist()}")
+
+
+
 def merge_duplicate_submissions(df):
+    """Merge multiple form submissions by same person — combine events and sum payments."""
+    
     df = df.copy()
     amount_col = get_amount_column(df)
+    screenshot_col = get_screenshot_column(df)   # ← THIS LINE — check if it's missing
     
     df["_group_key"] = df.apply(
         lambda row: str(row["WCA ID (if available)"]).strip().upper() 
@@ -70,15 +82,15 @@ def merge_duplicate_submissions(df):
     for key, group in df.groupby("_group_key", sort=False):
         base = group.iloc[0].to_dict()
         
-        # Always compute events_form for ALL entries (single or duplicate)
         all_events = []
         for _, row in group.iterrows():
             events = clean_events(str(row.get("Events you wish to participate in:", "")))
             all_events.extend(events)
         base["events_form"] = list(dict.fromkeys(all_events))
         
-        # Always sum payments
         base["amount_paid"] = pd.to_numeric(group[amount_col], errors="coerce").sum()
+        
+        base["screenshot_links"] = list(group[screenshot_col].dropna())
         
         merged_rows.append(base)
     
@@ -144,14 +156,13 @@ def get_amount_column(df):
 
 
 
-
-
 def prepare_form_dataframe(df):
     if "Timestamp" in df.columns:
         df = df.sort_values("Timestamp", ascending=False)
     
-    # Merge duplicate submissions — combine events and sum payments
     df = merge_duplicate_submissions(df)
+    
+    screenshot_col = get_screenshot_column(df)
 
     return pd.DataFrame({
         "wca_id":      df["WCA ID (if available)"],
@@ -159,6 +170,7 @@ def prepare_form_dataframe(df):
         "email":       df["E-mail ID:"].str.strip().str.lower(),
         "events_form": df["events_form"],
         "amount_paid": df["amount_paid"],
+        "screenshot_links": df["screenshot_links"],   # ← add this line
     })
 
 
