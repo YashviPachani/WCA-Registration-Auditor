@@ -16,7 +16,7 @@ def preprocess(image_path):
 
     h, w = img.shape[:2]
 
-    img = img[: int(h * 0.60), :]
+    img = img[: int(h * 0.70), :]
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 

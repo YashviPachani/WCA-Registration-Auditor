@@ -56,10 +56,16 @@ def clean_events(event_string):
 
 
 def get_screenshot_column(df):
-    """Find the screenshot upload column even if its exact name changes each competition."""
+
+    if "screenshot_link" in df.columns:
+        return "screenshot_link"
+
     for col in df.columns:
-        if "screenshot" in col.lower() and "payment" in col.lower():
+        col_lower = col.lower()
+
+        if "screenshot" in col_lower or "attach the screenshot" in col_lower:
             return col
+
     raise KeyError(
         f"No screenshot column found. Available columns: {df.columns.tolist()}"
     )
