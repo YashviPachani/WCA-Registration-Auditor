@@ -199,9 +199,9 @@ def build_match_row(
         "events_wca": wca_row["events_wca"] if wca_row is not None else None,
         "events_form": form_row["events_form"] if form_row is not None else None,
         "amount_paid": form_row["amount_paid"] if form_row is not None else None,
-        "participant_filename": form_row["participant_filename"]
+        "screenshot_links": form_row["screenshot_links"]
         if form_row is not None
-        else None,
+        else [],
         "missing_in_wca": missing_in_wca,
         "missing_in_form": missing_in_form,
     }

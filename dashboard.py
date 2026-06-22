@@ -13,8 +13,8 @@ from src.validator import (
     # find_duplicates,
 )
 from src.fee_calculator import verify_payment
-
-from src.payment_verifier import verify_payments
+from src.payment_verifier import verify_all_screenshots
+from src.fee_calculator import calculate_expected_fee
 
 st.set_page_config(page_title="WCA Registration Auditor", page_icon="🎲", layout="wide")
 
@@ -56,83 +56,10 @@ if wca_file and form_file:
     print(wca_df["events_wca"].head(10).tolist())
 
     matched_df = match_competitors(wca_df, form_df)
-    OCR_RESULTS = "data/processed/ocr_results.csv"
-
-    if os.path.exists(OCR_RESULTS):
-        ocr_df = pd.read_csv(OCR_RESULTS)
-    else:
-        st.error("ocr_results.csv not found. Run OCR first.")
-        st.stop()
-    payment_rows = []
-
-    ocr_lookup = {}
-
-    for _, row in ocr_df.iterrows():
-        ocr_lookup[row["file"]] = row["amount"]
-
-    ocr_files = list(ocr_lookup.keys())
-    print("\nFIRST 10 OCR FILES:")
-    print(list(ocr_lookup.keys())[:10])
-
-    for _, row in matched_df.iterrows():
-        if row["missing_in_wca"] or row["missing_in_form"]:
-            continue
-
-        expected = calculate_expected_fee(len(row["events_form"]))
-
-        participant = row["participant_filename"]
-
-        filename = None
-
-        for f in ocr_files:
-            if participant in f:
-                filename = f
-                break
-        if filename is None:
-            print("NO OCR FILE:", participant)
-
-        detected = ocr_lookup.get(filename)
-
-        if detected is None:
-            print("NOT FOUND:", filename)
-
-        if pd.isna(detected):
-            status = "OCR FAILED"
-
-        elif detected == expected:
-            status = "VERIFIED"
-
-        elif detected < expected:
-            status = "UNDERPAID"
-
-        else:
-            status = "OVERPAID"
-
-        payment_rows.append({
-            "name": row["name"],
-            "expected": expected,
-            "detected": detected,
-            "status": status,
-            "file": filename,
-        })
-
-    payment_results = pd.DataFrame(payment_rows)
-    failed_ocr_files = set(ocr_df[ocr_df["amount"].isna()]["file"])
-
-    payment_failed_files = set(
-        payment_results[payment_results["status"] == "OCR FAILED"]["file"]
-    )
-
-    print("\nOCR FAILURES NOT IN DASHBOARD:")
-    print(failed_ocr_files - payment_failed_files)
-
-    print("\nCount:", len(failed_ocr_files - payment_failed_files))
-    print("\nPAYMENT RESULT FILES:")
-    print(payment_results[["name", "file"]].head(10))
+    print(matched_df[["name", "screenshot_links"]].head())
     missing_wca = find_missing_in_wca(matched_df)
     missing_form = find_missing_in_form(matched_df)
     event_mismatches = find_event_mismatches(matched_df)
-    print(event_mismatches[event_mismatches["wca_id"].isna()].head(20))
     # duplicates = find_duplicates(form_df)
     st.header("Summary")
 
@@ -165,33 +92,30 @@ if wca_file and form_file:
     with tab3:
         st.dataframe(event_mismatches)
 
-    with tab4:
-        st.subheader("Payment Verification")
+    st.header("💰 AI Payment Verification")
+    st.caption(
+        "This checks payment screenshots using AI. Already-verified people are skipped automatically (cached)."
+    )
 
-        verified = len(payment_results[payment_results["status"] == "VERIFIED"])
+    if st.button("🔍 Verify Payment Screenshots"):
+        verify_df = matched_df[
+            ~matched_df["missing_in_wca"] & ~matched_df["missing_in_form"]
+        ].copy()
+        verify_df["expected_amount"] = verify_df["events_form"].apply(
+            lambda events: (
+                calculate_expected_fee(len(events)) if isinstance(events, list) else 0
+            )
+        )
 
-        failed = len(payment_results[payment_results["status"] == "OCR FAILED"])
+        progress_bar = st.progress(0)
+        status_text = st.empty()
 
-        underpaid = len(payment_results[payment_results["status"] == "UNDERPAID"])
+        def update_progress(current, total):
+            progress_bar.progress(current / total)
+            status_text.text(f"Processing {current}/{total}...")
 
-        overpaid = len(payment_results[payment_results["status"] == "OVERPAID"])
+        results = verify_all_screenshots(verify_df, progress_callback=update_progress)
 
-        c1, c2, c3, c4 = st.columns(4)
-
-        c1.metric("Verified", verified)
-
-        c2.metric("OCR Failed", failed)
-
-        c3.metric("Underpaid", underpaid)
-
-        c4.metric("Overpaid", overpaid)
-
-        st.divider()
-
-        st.dataframe(payment_results, use_container_width=True)
-
-        st.subheader("Manual Review Required")
-
-        failed_df = payment_results[payment_results["status"] == "OCR FAILED"]
-
-        st.dataframe(failed_df, use_container_width=True)
+        status_text.text("Done!")
+        results_df = pd.DataFrame(results)
+        st.dataframe(results_df)
