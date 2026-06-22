@@ -94,16 +94,123 @@ Reports:
 
 ## 4. Google Drive Screenshot Integration
 
-The system automatically reads payment screenshot links submitted through Google Forms.
+The payment screenshots uploaded through the Google Form are stored in Google Drive.
 
-Supported:
+The project integrates with the Google Drive API using a Google Service Account to automatically access and download these screenshots.
 
-- Google Drive share links
-- Google Form file uploads
+### Workflow
 
-Screenshots are downloaded automatically.
+```text
+Google Form
+      ↓
+Screenshot Upload
+      ↓
+Google Drive
+      ↓
+Drive Share Link Stored in Form Response
+      ↓
+Google Drive API
+      ↓
+Download Screenshot
+      ↓
+Local Screenshot Cache
+      ↓
+OCR Processing
+```
+
+### Authentication
+
+The project uses:
+
+- Google Drive API
+- Service Account Authentication
+- JSON Credentials File
+
+A service account is created in Google Cloud Console and granted access to the folder containing payment screenshots.
+
+This eliminates the need for manual login and allows the system to securely access files programmatically.
 
 ---
+
+### File Identification
+
+Each screenshot link submitted through the Google Form contains a unique Google Drive File ID.
+
+Example:
+
+```text
+https://drive.google.com/open?id=19HJBy96uE7y2UhP4XymBKIhMouryGc5K
+```
+
+Extracted File ID:
+
+```text
+19HJBy96uE7y2UhP4XymBKIhMouryGc5K
+```
+
+The application automatically extracts this File ID and uses it to retrieve the corresponding image through the Google Drive API.
+
+---
+
+### Automatic Download
+
+For every participant:
+
+```text
+Participant
+      ↓
+Google Drive Link
+      ↓
+Extract File ID
+      ↓
+Google Drive API Request
+      ↓
+Download Screenshot
+      ↓
+Store Locally
+```
+
+No manual screenshot collection is required.
+
+---
+
+### Screenshot Cache
+
+Downloaded screenshots are stored locally using the Google Drive File ID as the filename.
+
+Example:
+
+```text
+data/screenshots_cache/
+│
+├── 19HJBy96uE7y2UhP4XymBKIhMouryGc5K.jpg
+├── 1A2B3C4D5E6F7G8H9.jpg
+└── ...
+```
+
+Before downloading a screenshot, the system checks whether it already exists in the cache.
+
+```text
+Screenshot Requested
+        ↓
+Already Downloaded?
+      ↙     ↘
+    Yes      No
+     ↓        ↓
+ Use Cache  Download
+```
+
+This prevents repeated downloads and significantly reduces API calls.
+
+---
+
+### Benefits
+
+- Fully automated screenshot retrieval
+- No manual screenshot management
+- Secure access using Service Accounts
+- Reduced API usage through caching
+- Scalable for large competitions with hundreds of participants
 
 # AI Payment Verification
 
