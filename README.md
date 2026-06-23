@@ -72,7 +72,7 @@ Highest confidence matching.
 Example:
 
 ```text
-2025PATE01
+2025PACH02
 ```
 
 ---
@@ -175,13 +175,13 @@ Each screenshot link submitted through the Google Form contains a unique Google 
 Example:
 
 ```text
-https://drive.google.com/open?id=19HJBy96uE7y2UhP4XymBKIhMouryGc5K
+https://drive.google.com/open?id=19HJBy96uE7y2UhP4XymBKIhMouryGc5
 ```
 
 Extracted File ID:
 
 ```text
-19HJBy96uE7y2UhP4XymBKIhMouryGc5K
+19HJBy96uE7y2UhP4XymBKIhMouryGc5
 ```
 
 The application automatically extracts this File ID and uses it to retrieve the corresponding image through the Google Drive API.
@@ -219,8 +219,8 @@ Example:
 ```text
 data/screenshots_cache/
 │
-├── 19HJBy96uE7y2UhP4XymBKIhMouryGc5K.jpg
-├── 1A2B3C4D5E6F7G8H9.jpg
+├── 19HJBy96uE7y2UhP4XymBKIhMouryGc5.jpg
+├── 1A2B3C4D5E6F7G8H.jpg
 └── ...
 ```
 
@@ -491,7 +491,7 @@ Example:
 
 ```json
 {
-  "2025PATE01": {
+  "2025PACH02": {
     "amount_detected": 800,
     "status": "VERIFIED"
   }
@@ -723,7 +723,7 @@ Any event that requires participants to register, pay fees, and upload payment p
 ## 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/YashviPachani/WCA-Registration-Auditor.git
 cd WCA-Registration-Auditor
 ```
 
