@@ -643,42 +643,42 @@ Runs OCR verification and displays:
 
 ## Upload Files
 
-![alt text](<Screenshot 2026-06-22 151722.png>)
+![alt text](<images/Screenshot 2026-06-22 151722.png>)
 
 ## Home Dashboard
 
-![alt text](<Screenshot 2026-06-22 151739.png>)
+![alt text](<images/Screenshot 2026-06-22 151739.png>)
 
 ---
 
 ## Missing Registrations
 
-![alt text](<Screenshot 2026-06-22 151839.png>)
+![alt text](<images/Screenshot 2026-06-22 151839.png>)
 
 ---
 
 ## Event Mismatches
 
-![alt text](<Screenshot 2026-06-22 151856.png>)
+![alt text](<images/Screenshot 2026-06-22 151856.png>)
 
 ---
 
 ## OCR Scan
 
-![alt text](<WhatsApp Image 2026-06-22 at 15.22.34.jpeg>)
+![alt text](<images/WhatsApp Image 2026-06-22 at 15.22.34.jpeg>)
 
 ---
 
 ## Payment Verification
 
 ### Could Not Detect
-![alt text](image.png)
+![alt text](images/image.png)
 
 ### Underpaid
-![alt text](image-1.png)
+![alt text](images/image-1.png)
 
 ### Overpaid
-![alt text](image-2.png)
+![alt text](images/image-2.png)
 
 ---
 
