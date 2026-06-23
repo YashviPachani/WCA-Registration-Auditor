@@ -5,3 +5,12 @@ __pycache__/
 .vscode/
 report.xlsx
 *.xlsx
+credentials.json
+data/screenshots_cache/
+data/payment_verification_cache.json
+data/raw/*.csv
+data/raw/*.xlsx
+data/processed/*.csv
+data/processed/*.xlsx
+!data/raw/wca_sample.csv
+!data/raw/form_sample.csv

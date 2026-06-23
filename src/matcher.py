@@ -6,18 +6,17 @@ from rapidfuzz import fuzz
 def normalize_wca_id(value):
     if pd.isna(value):
         return None
-    
+
     value = str(value).strip().upper()
-    
+
     if value == "NAN":  # ← add this check
         return None
-    
+
     pattern = r"^\d{4}[A-Z]{4}\d{2}$"
     if re.match(pattern, value):
         return value
-    
-    return None
 
+    return None
 
 
 def normalize_name(name):
@@ -80,7 +79,7 @@ def match_competitors(wca_df, form_df):
         if wca_id is not None and pd.notna(wca_id) and wca_id in form_lookup:
             form_idx = form_lookup[wca_id]
             form_row = form_df.loc[form_idx]
-           
+
             matched_rows.append(
                 build_match_row(
                     wca_row,
@@ -93,13 +92,12 @@ def match_competitors(wca_df, form_df):
             used_wca.add(wca_idx)
             used_form.add(form_idx)
 
-
     # --------------------------------------------------
     # STEP 1.5: MATCH REMAINING BY EMAIL
     # --------------------------------------------------
 
     remaining_form = form_df.drop(index=list(used_form))
-    remaining_wca  = wca_df.drop(index=list(used_wca))
+    remaining_wca = wca_df.drop(index=list(used_wca))
 
     # Build email lookup from remaining WCA rows
     wca_email_lookup = {}
@@ -111,7 +109,7 @@ def match_competitors(wca_df, form_df):
         form_email = str(form_row.get("email", "")).strip().lower()
         if form_email and form_email in wca_email_lookup:
             wca_idx = wca_email_lookup[form_email]
-            
+
             matched_rows.append(
                 build_match_row(wca_df.loc[wca_idx], form_row, False, False)
             )
@@ -128,12 +126,10 @@ def match_competitors(wca_df, form_df):
         if wca_idx in used_wca:
             continue
 
-
         match_idx = find_best_name_match(
             wca_row["name"],
             remaining_form["name"],
         )
-        
 
         if match_idx is not None:
             form_row = remaining_form.loc[match_idx]
@@ -203,6 +199,9 @@ def build_match_row(
         "events_wca": wca_row["events_wca"] if wca_row is not None else None,
         "events_form": form_row["events_form"] if form_row is not None else None,
         "amount_paid": form_row["amount_paid"] if form_row is not None else None,
+        "screenshot_links": form_row["screenshot_links"]
+        if form_row is not None
+        else [],
         "missing_in_wca": missing_in_wca,
         "missing_in_form": missing_in_form,
     }

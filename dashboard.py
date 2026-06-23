@@ -13,6 +13,8 @@ from src.validator import (
     # find_duplicates,
 )
 from src.fee_calculator import verify_payment
+from src.payment_verifier import verify_all_screenshots
+from src.fee_calculator import calculate_expected_fee
 
 st.set_page_config(page_title="WCA Registration Auditor", page_icon="🎲", layout="wide")
 
@@ -21,6 +23,15 @@ st.title("🎲 WCA Registration Auditor")
 wca_file = st.file_uploader("Upload WCA Export", type=["csv", "xlsx"])
 
 form_file = st.file_uploader("Upload Google Form Export", type=["csv", "xlsx"])
+
+
+def calculate_expected_fee(num_events):
+
+    if num_events <= 3:
+        return 600
+
+    return 800
+
 
 if wca_file and form_file:
     wca_raw = load_file(wca_file)
@@ -45,28 +56,27 @@ if wca_file and form_file:
     print(wca_df["events_wca"].head(10).tolist())
 
     matched_df = match_competitors(wca_df, form_df)
-
+    print(matched_df[["name", "screenshot_links"]].head())
     missing_wca = find_missing_in_wca(matched_df)
     missing_form = find_missing_in_form(matched_df)
     event_mismatches = find_event_mismatches(matched_df)
-    print(event_mismatches[event_mismatches["wca_id"].isna()].head(20))
     # duplicates = find_duplicates(form_df)
     st.header("Summary")
 
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3, c4, c5 = st.columns(5)
 
     c1.metric("Competitors", len(matched_df))
     c2.metric("Missing in WCA", len(missing_wca))
     c3.metric("Missing in Form", len(missing_form))
     c4.metric("Event Mismatches", len(event_mismatches))
-
     # duplicate_count = len(duplicates["email"]) + len(duplicates["wca_id"])
     # c5.metric("Duplicates", duplicate_count)
 
-    tab1, tab2, tab3 = st.tabs([
+    tab1, tab2, tab3, tab4 = st.tabs([
         "Matched Data",
         "Missing Registrations",
         "Event Mismatches",
+        "Payment Verification",
     ])
 
     with tab1:
@@ -81,3 +91,31 @@ if wca_file and form_file:
 
     with tab3:
         st.dataframe(event_mismatches)
+
+    st.header("💰 AI Payment Verification")
+    st.caption(
+        "This checks payment screenshots using AI. Already-verified people are skipped automatically (cached)."
+    )
+
+    if st.button("🔍 Verify Payment Screenshots"):
+        verify_df = matched_df[
+            ~matched_df["missing_in_wca"] & ~matched_df["missing_in_form"]
+        ].copy()
+        verify_df["expected_amount"] = verify_df["events_form"].apply(
+            lambda events: (
+                calculate_expected_fee(len(events)) if isinstance(events, list) else 0
+            )
+        )
+
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+
+        def update_progress(current, total):
+            progress_bar.progress(current / total)
+            status_text.text(f"Processing {current}/{total}...")
+
+        results = verify_all_screenshots(verify_df, progress_callback=update_progress)
+
+        status_text.text("Done!")
+        results_df = pd.DataFrame(results)
+        st.dataframe(results_df)
