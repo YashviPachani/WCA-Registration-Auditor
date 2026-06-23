@@ -1,20 +1,56 @@
-# WCA Registration Auditor
+## What is a WCA Competition?
 
-A Streamlit based automation tool for WCA competition organizers that reconciles registrations, verifies event selections, and validates payment screenshots using OCR and intelligent caching.
+The **World Cube Association (WCA)** is the official governing body for competitive twisty puzzle events such as:
+
+- 3x3x3 Cube
+- 2x2x2 Cube
+- 4x4x4 Cube
+- Pyraminx
+- Megaminx
+- Skewb
+- Clock
+- Square-1
+- and other official events
+
+To participate in a WCA competition, competitors typically:
+
+1. Register on the official WCA competition page.
+2. Fill out a separate organizer registration form.
+3. Select the events they wish to compete in.
+4. Pay the registration fee.
+5. Upload proof of payment.
+
+For small competitions this process can be managed manually, but for larger competitions with 100–500+ competitors, verifying registrations, payments, and event selections becomes time-consuming and error-prone.
 
 ---
 
-# Problem Statement
+## Problem Statement
 
-Organizing a WCA competition involves verifying information across multiple platforms:
+A typical WCA competition may receive registrations from over 100 participants. Organizers must manually verify:
 
-1. WCA Registration System
-2. Google Registration Form
-3. Payment Screenshots
+- Whether each competitor registered on both platforms
+- Whether event selections match
+- Whether the correct registration fee has been paid
+- Whether payment proof is valid
 
-Manually checking hundreds of registrations is repetitive, time consuming, and prone to human error.
+Performing these checks manually can take several hours and is susceptible to human error.
 
-This project automates the entire auditing workflow.
+The **WCA Registration Auditor** automates these tasks by combining:
+
+- Data reconciliation
+- Fuzzy matching
+- Google Drive integration
+- OCR-based payment verification
+- Intelligent caching
+- Interactive visualization
+
+into a single workflow.
+
+---
+
+# WCA Registration Auditor
+
+A Streamlit based automation tool for WCA competition organizers that reconciles registrations, verifies event selections, and validates payment screenshots using OCR and intelligent caching.
 
 ---
 
@@ -662,9 +698,153 @@ Runs OCR verification and displays:
 ---
 
 
-# Developed For
+# Where Can This System Be Used?
 
-WCA Competition Organizers
+Although developed for WCA competitions, the system can be adapted for any event that involves:
+
+- Multi-platform registrations
+- Fee collection
+- Payment screenshot verification
+- Participant auditing
+
+Examples include:
+
+- Technical festivals
+- Hackathons
+- Workshops
+- Club events
+- Sports tournaments
+- Conference registrations
+
+Any event that requires participants to register, pay fees, and upload payment proof can benefit from this system.
+
+# Running the Project
+
+## 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd WCA-Registration-Auditor
+```
+
+---
+
+## 2. Create a Virtual Environment
+
+### Windows
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+### Linux / macOS
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+---
+
+## 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 4. Configure Google Drive API
+
+1. Create a Google Cloud Project.
+2. Enable **Google Drive API**.
+3. Create a **Service Account**.
+4. Download the credentials JSON file.
+5. Rename it to:
+
+```text
+credentials.json
+```
+
+6. Place it in the project root directory.
+7. Share the Google Drive folder containing payment screenshots with the Service Account email (Viewer access).
+
+---
+
+## 5. Launch the Dashboard
+
+```bash
+streamlit run dashboard.py
+```
+
+Open:
+
+```text
+http://localhost:8501
+```
+
+if the browser does not open automatically.
+
+---
+
+## 6. Upload Competition Files
+
+Upload:
+
+- WCA Registration Export (`.csv` / `.xlsx`)
+- Google Form Responses (`.csv` / `.xlsx`)
+
+through the dashboard.
+
+---
+
+## 7. Verify Payments
+
+Click:
+
+```text
+🔍 Verify Payment Screenshots
+```
+
+The system will:
+
+- Download new screenshots from Google Drive
+- Reuse previously downloaded screenshots
+- Run OCR on new screenshots only
+- Reuse cached OCR results for previously verified participants
+- Generate a payment verification report
+
+---
+
+## 8. Review Results
+
+The dashboard displays:
+
+- Matched Competitors
+- Missing in WCA
+- Missing in Form
+- Event Mismatches
+- Payment Verification Results
+- Manual Review Cases
+
+---
+
+## Cache Files
+
+Downloaded screenshots:
+
+```text
+data/screenshots_cache/
+```
+
+OCR verification cache:
+
+```text
+data/payment_verification_cache.json
+```
+
+Only new participants are processed in subsequent runs, significantly reducing execution time.
 
 # Developed By
 
