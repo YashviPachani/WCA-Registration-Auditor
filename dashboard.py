@@ -24,15 +24,6 @@ wca_file = st.file_uploader("Upload WCA Export", type=["csv", "xlsx"])
 
 form_file = st.file_uploader("Upload Google Form Export", type=["csv", "xlsx"])
 
-
-def calculate_expected_fee(num_events):
-
-    if num_events <= 3:
-        return 600
-
-    return 800
-
-
 if wca_file and form_file:
     wca_raw = load_file(wca_file)
     form_raw = load_file(form_file)
@@ -63,20 +54,20 @@ if wca_file and form_file:
     # duplicates = find_duplicates(form_df)
     st.header("Summary")
 
-    c1, c2, c3, c4, c5 = st.columns(5)
+    c1, c2, c3, c4 = st.columns(4)
 
     c1.metric("Competitors", len(matched_df))
     c2.metric("Missing in WCA", len(missing_wca))
     c3.metric("Missing in Form", len(missing_form))
     c4.metric("Event Mismatches", len(event_mismatches))
+
     # duplicate_count = len(duplicates["email"]) + len(duplicates["wca_id"])
     # c5.metric("Duplicates", duplicate_count)
 
-    tab1, tab2, tab3, tab4 = st.tabs([
+    tab1, tab2, tab3 = st.tabs([
         "Matched Data",
         "Missing Registrations",
         "Event Mismatches",
-        "Payment Verification",
     ])
 
     with tab1:
