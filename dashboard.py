@@ -47,7 +47,7 @@ if wca_file and form_file:
     print(wca_df["events_wca"].head(10).tolist())
 
     matched_df = match_competitors(wca_df, form_df)
-    print(matched_df[["name", "screenshot_links"]].head())
+    print(matched_df[["name", "screenshot_links"]].head()) 
     missing_wca = find_missing_in_wca(matched_df)
     missing_form = find_missing_in_form(matched_df)
     event_mismatches = find_event_mismatches(matched_df)
@@ -84,18 +84,12 @@ if wca_file and form_file:
         st.dataframe(event_mismatches)
 
     st.header("💰 AI Payment Verification")
-    st.caption(
-        "This checks payment screenshots using AI. Already-verified people are skipped automatically (cached)."
-    )
+    st.caption("This checks payment screenshots using AI. Already-verified people are skipped automatically (cached).")
 
     if st.button("🔍 Verify Payment Screenshots"):
-        verify_df = matched_df[
-            ~matched_df["missing_in_wca"] & ~matched_df["missing_in_form"]
-        ].copy()
+        verify_df = matched_df[~matched_df["missing_in_wca"] & ~matched_df["missing_in_form"]].copy()
         verify_df["expected_amount"] = verify_df["events_form"].apply(
-            lambda events: (
-                calculate_expected_fee(len(events)) if isinstance(events, list) else 0
-            )
+            lambda events: calculate_expected_fee(len(events)) if isinstance(events, list) else 0
         )
 
         progress_bar = st.progress(0)
